@@ -9,9 +9,9 @@ Created on Sat Nov 27 10:06:05 2021
 from tkinter import Tk, Button, Canvas
 from random import choice,seed
 
-seed(10)
+seed(1)
 import sys
-sys.setrecursionlimit(15000)
+sys.setrecursionlimit(150000)
 
 class Maze():
     """
@@ -22,11 +22,15 @@ class Maze():
         h and w are the height and width of the maze in number of blocks
         unit is the size in pixels of a block
         each wall is wall_width pixels wide
-        """
+        """        
         self.root = root
         root.title("Maze")
+        self.unit= unit
+        self.wall_width = wall_width
+        
         self.stack = Stack()
         
+        #Converting the size of the maze from blocks to pixels
         self.h = 2*wall_width + h*unit + (h-1)*wall_width
         self.w = 2*wall_width + w*unit + (w-1)*wall_width
         
@@ -51,7 +55,15 @@ class Maze():
         self.canvas.create_rectangle(0,self.h - wall_width,self.w,self.h,fill='black')
         self.canvas.create_rectangle(self.w - wall_width,0,self.w,self.h,fill='black')
         
-        Room(self,0,0,h-1,w-1,unit,wall_width)
+        #Iinitializing the stack
+        self.stack.Push([0,0,h-1,w-1])
+        self.next_step()
+        
+    def next_step(self):
+        #Constructs the maze step-by-step
+        while not(self.stack.isEmpty()):
+            args = self.stack.Pop()
+            Room(self,args[0],args[1],args[2],args[3],self.unit,self.wall_width)
     
 class Room():
     def __init__(self,maze,xt,yt,xb,yb,unit,wall_width):
@@ -145,11 +157,12 @@ class Room():
             if not(orientation):
                 #Horizontal wall - top room
                 self.maze.stack.Push([self.xt,yw+1,self.xb,self.yb])
-                Room(self.maze,self.xt,self.yt,self.xb,yw,self.unit,self.wall_width)
+                self.maze.stack.Push([self.xt,self.yt,self.xb,yw])
+                
             else:
                 #Vertical wall - left room
                 self.maze.stack.Push([xw+1,self.yt,self.xb,self.yb])
-                Room(self.maze,self.xt,self.yt,xw,self.yb,self.unit,self.wall_width)   
+                self.maze.stack.Push([self.xt,self.yt,xw,self.yb])
                 
             
             
@@ -170,8 +183,8 @@ class Stack():
         return(self.values)
         
         
-    
-h,w,unit,wall_width = 20,20,20,3
+
+h,w,unit,wall_width = 100,100,5,1
 root = Tk()
 maze = Maze(root,h,w,unit,wall_width)
 root.mainloop()
